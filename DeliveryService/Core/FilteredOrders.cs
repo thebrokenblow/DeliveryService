@@ -1,18 +1,19 @@
 ﻿using DeliveryService.Model;
-using DeliveryService.Factories;
+using DeliveryService.Core.Interfaces;
+using DeliveryService.Factories.Interfaces;
 
 namespace DeliveryService.Core;
 
-public class FilteredOrders(string path)
+public class FilteredOrders(IFactoryOrders factoryOrders) : IFilteredOrders
 {
-    private readonly FactoryOrders factoryOrders = new(path);
-
-    public IAsyncEnumerable<Order> FilterOrder(FilteredParaments filteredParaments)
+    public IAsyncEnumerable<Order> FilterOrderAsync(string path, FilteredParaments filteredParaments)
     {
+        var rightBorderDateFiltering = filteredParaments.FirstDeliveryDateTime.AddMinutes(30);
+
         return factoryOrders
-            .CreateOrders()
-            .Where(x => (x.District == filteredParaments.CityDistrict) &&
-                 (x.DeliveryTime >= filteredParaments.FirstDeliveryDateTime && 
-                  x.DeliveryTime <= filteredParaments.FirstDeliveryDateTime.AddMinutes(30)));
+                    .CreateOrdersAsync(path)
+                    .Where(order => (order.District == filteredParaments.CityDistrict) &&
+                                    (order.DeliveryTime >= filteredParaments.FirstDeliveryDateTime && 
+                                        order.DeliveryTime <= rightBorderDateFiltering));
     }
 }

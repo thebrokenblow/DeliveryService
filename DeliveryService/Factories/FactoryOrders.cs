@@ -1,13 +1,14 @@
 ﻿using DeliveryService.Model;
-using DeliveryService.Repositories;
+using DeliveryService.Factories.Interfaces;
+using DeliveryService.Repositories.Interfaces;
+using Serilog;
+using Serilog.Core;
 
 namespace DeliveryService.Factories;
 
-public class FactoryOrders(string path)
+public class FactoryOrders(IRepositoryFileOrders repositoryFileOrders) : IFactoryOrders
 {
-    private readonly RepositoryFileOrders repositoryFileOrders = new();
-
-    public async IAsyncEnumerable<Order> CreateOrders()
+    public async IAsyncEnumerable<Order> CreateOrdersAsync(string path)
     {
         await foreach (var stringOrder in repositoryFileOrders.ReadOrdersAsync(path))
         {
@@ -19,17 +20,17 @@ public class FactoryOrders(string path)
 
     private static Order CreateOrder(string stringOrder)
     {
-        var paramsOrder = stringOrder.Split("::")
-                                     .Select(param => param.Trim())
+        var parametersOrder = stringOrder.Split("::")
+                                     .Select(parameter => parameter.Trim())
                                      .ToList();
 
         return new Order
         {
-            Id = int.Parse(paramsOrder[0]),
-            Weight = double.Parse(paramsOrder[1]),
-            District = paramsOrder[2],
+            Id = int.Parse(parametersOrder[0]),
+            Weight = double.Parse(parametersOrder[1]),
+            District = parametersOrder[2],
             DeliveryTime = DateTime.ParseExact
-                           (paramsOrder[3],
+                           (parametersOrder[3],
                             "yyyy-MM-dd HH:mm:ss",
                             System.Globalization.CultureInfo.InvariantCulture)
         };
