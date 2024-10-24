@@ -22,7 +22,7 @@
 
 ```sh
     _cityDistrict - Район доставки
-    _firstDeliveryDateTime - Время первой доставки
+    _firstDeliveryDateTime - Время первой доставки (в формате yyyy-MM-dd HH:mm:ss)
     _sourceOrder - путь до исходного файла (он есть в репозитории, рядом с файлом README.md под названием data.txt)
     _deliveryLog - путь до файла, куда будут записываться логи
     _deliveryOrder - путь до файла, куда будут записываться результат
@@ -31,10 +31,5 @@
 5. Запускать приложение надо строго в том порядке в котором они описаны выше, так же значение параметров записываются в кавычках "" и между названием параметра и самим параметром ставится знак присваивания, без пробелов. Пример запуска приложения: 
 
 ```sh
-dotnet run
-_cityDistrict="Central"
-_firstDeliveryDateTime="2023-12-10 10:40:00"
-_sourceOrder="C:\Users\Artem\Desktop\data\data.txt"
-_deliveryLog="C:\Users\Artem\Desktop\data\log.txt"
-_deliveryOrder="C:\Users\Artem\Desktop\data\result.txt"
+dotnet run _cityDistrict="Central" _firstDeliveryDateTime="2023-12-10 10:40:00" _sourceOrder="C:\Users\Artem\Desktop\data\data.txt" _deliveryLog="C:\Users\Artem\Desktop\data\log.txt" _deliveryOrder="C:\Users\Artem\Desktop\data\result.txt"
 ```
