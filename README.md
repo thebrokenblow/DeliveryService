@@ -14,7 +14,7 @@
    https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 
 3. Далее для запуска проекта надо перейти в консоли в дерикторию проекта. В дериктории должно быть следующее содержимое
-    ![Дериктория проекта](https://github.com/thebrokenblow/OnlineStore/blob/master/photos/appsettings.png)
+    ![Дериктория проекта](https://github.com/thebrokenblow/DeliveryService/blob/master/Photos/Console.png?raw=true)
 
 4. Для запуска проекта нам необходимо использовать 5 параметров
 ```sh
