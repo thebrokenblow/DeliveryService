@@ -1,6 +1,5 @@
 ﻿using DeliveryService.Model;
 using DeliveryService.Factories.Interfaces;
-using DeliveryService.Repositories.Interfaces;
 
 namespace DeliveryService.Factories;
 

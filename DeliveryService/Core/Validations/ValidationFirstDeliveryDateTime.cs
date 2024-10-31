@@ -1,14 +1,12 @@
 ﻿using DeliveryService.Core.Validations.Interfaces;
 using DeliveryService.Model;
+using Serilog;
 using System.Globalization;
 
 namespace DeliveryService.Core.Validations;
 
-public class ValidationFirstDeliveryDateTime : IValidationArg
+public class ValidationFirstDeliveryDateTime(ILogger logger, string formatDateTime = "yyyy-MM-dd HH:mm:ss", string nameCultureInfo = "ru-RU") : IValidationArg
 {
-    private const string formatDateTime = "yyyy-MM-dd HH:mm:ss";
-    private const string nameCultureInfo = "ru-RU";
-
     public ArgsState SetValidValue(string value, ArgsState argsState)
     {
         if (DateTime.TryParseExact(
@@ -18,7 +16,13 @@ public class ValidationFirstDeliveryDateTime : IValidationArg
                                 DateTimeStyles.None,
                                 out DateTime deliveryTime))
         {
-            argsState.DeliveryDateTime = deliveryTime;
+            argsState.FirstDeliveryDateTime = deliveryTime;
+            logger.Information($"The value was entered from the command line of the date and time first delivery : {value}");
+        }
+        else
+        {
+            logger.Error($"The incorrect value was entered for the path orders, the value of the date and time first delivery: {value}");
+            throw new ArgumentException($"The Incorrect value for the date of the date and time first delivery: {value}");
         }
 
         return argsState;

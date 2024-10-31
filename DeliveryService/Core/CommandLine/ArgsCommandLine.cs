@@ -2,32 +2,37 @@
 using DeliveryService.Core.Validations.Interfaces;
 using DeliveryService.Extensions;
 using DeliveryService.Model;
+using Serilog;
 
 namespace DeliveryService.Core.CommandLine;
 
-public class ArgsCommandLine
+public class ArgsCommandLine(ILogger logger)
 {
+    private const int countElementsArgument = 2;
+    private const char assignmentOperator = '=';
+
     private readonly Dictionary<string, IValidationArg> argsValidation = new()
     {
-        { "_cityDistrict", new ValidationCityDistrict() },
-        { "_firstDeliveryDateTime", new ValidationFirstDeliveryDateTime() },
-        { "_sourceOrder", new ValidationFilePathOrder() },
-        { "_deliveryLog", new ValidationFilePathLog() },
-        { "_deliveryOrder", new ValidationFilePathFilterOrder() }
+        { "_cityDistrict", new ValidationCityDistrict(logger) },
+        { "_firstDeliveryDateTime", new ValidationFirstDeliveryDateTime(logger) },
+        { "_sourceOrder", new ValidationFilePathOrder(logger) },
+        { "_deliveryLog", new ValidationFilePathLog(logger) },
+        { "_deliveryOrder", new ValidationFilePathFilterOrder(logger) }
     };
 
     public ArgsState Validate(string[] args)
     {
-        if (args.Length != 5)
+        if (args.Length != argsValidation.Count)
         {
-            throw new InvalidDataException("Неверное количество аргументов");
+            logger.Error("Incorrect number of arguments entered");
+            throw new ArgumentException("Incorrect number of arguments");
         }
 
         var argsState = new ArgsState();
 
         foreach (var arg in args)
         {
-            var currentArgs = arg.Split('=', 2);
+            var currentArgs = arg.Split(assignmentOperator, countElementsArgument);
             var nameParameter = currentArgs.First();
 
             if (argsValidation.TryGetValue(nameParameter, out IValidationArg? validationArg))
@@ -36,7 +41,8 @@ public class ArgsCommandLine
             }
             else
             {
-                //Тут исключение
+                logger.Error($"Incorrect argument name has been entered: {nameParameter}");
+                throw new ArgumentException($"Incorrect argument name has been entered: {nameParameter}");
             }
         }
 

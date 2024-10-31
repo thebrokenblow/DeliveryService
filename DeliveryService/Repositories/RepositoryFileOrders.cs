@@ -16,7 +16,7 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
         }
         catch(Exception ex)
         {
-            logger.Error($"Не смогли начать работу с файлом по пути: {path}, сообщение ошибки: {ex.Message}");
+            logger.Error($"Could not start working with the file at the path: {path}, error message: {ex.Message}");
             throw;
         }
         
@@ -30,22 +30,21 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
             }
             catch(Exception ex)
             {
-                logger.Error($"Ошибка чтения строки из файла по пути: {path}, сообщение ошибки: {ex.Message}");
+                logger.Error($"Error reading a line from a file along the path: {path}, error message: {ex.Message}");
                 throw;
             }
-
-            logger.Information($"Прочтён заказ ({order}) путь ({path})");
 
             if (order is not null)
             {
                 countRecords++;
+                logger.Information($"Order read: {order}, path: {path}");
 
                 yield return order;
             }
         }
         while (order != null);
 
-        logger.Information($"Прочтённых заказов ({countRecords}) по пути ({path})");
+        logger.Information($"Count of orders read: {countRecords}, path: {path}");
         streamReader.Dispose();
     }
 
@@ -63,7 +62,7 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
         }
         catch(Exception ex)
         {
-            logger.Error($"Не смогли начать работу с файлом по пути: {path}, сообщение ошибки: {ex.Message}");
+            logger.Error($"Could not start working with the file at the path: {path}, error message: {ex.Message}");
             throw;
         }
 
@@ -73,15 +72,15 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
             try
             {
                 await streamWriter.WriteLineAsync(order.ToString());
-                logger.Information($"Записан заказ ({order}) путь ({path})");
+                logger.Information($"The order has been write: {order}, path: {path}");
             }
             catch
             {
-                logger.Error($"Ошибка записи заказа ({order}) путь ({path})");
+                logger.Error($"Error writing the order: {order}, path: {path}");
             }
         }
 
+        logger.Information($"Count of orders write: {countRecords}, path: {path}");
         streamWriter.Dispose();
-        logger.Information($"Записано заказов ({countRecords}) по пути ({path})");
     }
 }

@@ -24,9 +24,12 @@ public class OrderMapper(
         var enumeratorOrderProperties = orderProperties.GetEnumerator();
 
         var id = ParseType(enumeratorOrderProperties, int.Parse);
+
         var weight = ParseType(enumeratorOrderProperties, double.Parse);
+        enumeratorOrderProperties.MoveNext();
 
         var district = enumeratorOrderProperties.Current;
+
         if (!enumeratorOrderProperties.MoveNext())
         {
             LogErrorReadingProperty();
@@ -44,13 +47,14 @@ public class OrderMapper(
 
         if (enumeratorOrderProperties.MoveNext())
         {
-            logger.Error("В записи есть лишние свойства");
+            logger.Error("There are extra properties in the record");
+            throw new IncorrectData("There are extra properties in the record");
         }
 
         return new OrderDto
         {
-            Id = ParseType(enumeratorOrderProperties, int.Parse),
-            Weight = ParseType(enumeratorOrderProperties, double.Parse),
+            Id = id,
+            Weight = weight,
             District = district,
             DeliveryTime = deliveryTime,
         };
@@ -69,14 +73,14 @@ public class OrderMapper(
         }
         catch (Exception exception)
         {
-            logger.Error("Ошибка преобразования типа");
-            throw new IncorrectData($"Не удалось преобразовать тип, сообщение ошибки: {exception.Message}");
+            logger.Error($"Failed to convert the type, error message: {exception.Message}");
+            throw new IncorrectData($"Failed to convert the type, error message: {exception.Message}");
         }
     }
 
     private void LogErrorReadingProperty()
     {
-        logger.Error("Свойство не было прочитано");
-        throw new NotFoundException("Свойство не было прочитано");
+        logger.Error("The property has not been read");
+        throw new NotFoundException("The property has not been read");
     }
 }

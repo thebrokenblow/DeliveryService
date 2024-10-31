@@ -9,23 +9,23 @@ var argsState = new ArgsCommandLine().Validate(args);
 
 var filteringArguments = new FilteringArguments
 {
-    District = argsState.District,
-    FirstDeliveryDateTime = argsState.DeliveryDateTime.Value,
-    SecondDeliveryDateTime = argsState.DeliveryDateTime.Value.AddMinutes(30)
+    District = argsState.District!,
+    FirstDeliveryDateTime = argsState.FirstDeliveryDateTime!.Value,
+    SecondDeliveryDateTime = argsState.FirstDeliveryDateTime.Value.AddMinutes(30)
 };
 
 var logger = new LoggerConfiguration()
                                 .MinimumLevel.Debug()
-                                .WriteTo.File(argsState.FilePathLog)
+                                .WriteTo.File(argsState.FilePathLog!)
                                 .CreateLogger();
 
 var repositoryFileOrders = new RepositoryFileOrders(logger);
-var ordersStr = repositoryFileOrders.ReadOrdersAsync(argsState.FilePathOrder);
+var ordersStr = repositoryFileOrders.ReadOrdersAsync(argsState.FilePathOrder!);
 var orderMapper = new OrderMapper(new FactoryOrders(), logger);
 var orders = orderMapper.Map(ordersStr);
 
 var filteringOrders = orders.Where(CreateFilteringMethod(filteringArguments));
-await repositoryFileOrders.WriteOrdersAsync(argsState.FilePathFilterOrder, filteringOrders);
+await repositoryFileOrders.WriteOrdersAsync(argsState.FilePathFilterOrder!, filteringOrders);
 
 Func<Order, bool> CreateFilteringMethod(FilteringArguments filteringArguments)
 {
