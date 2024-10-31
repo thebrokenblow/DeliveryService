@@ -6,25 +6,24 @@ using Serilog;
 
 namespace DeliveryService.Core.CommandLine;
 
-public class ArgsCommandLine(ILogger logger)
+public class ArgsCommandLine
 {
     private const int countElementsArgument = 2;
     private const char assignmentOperator = '=';
 
     private readonly Dictionary<string, IValidationArg> argsValidation = new()
     {
-        { "_cityDistrict", new ValidationCityDistrict(logger) },
-        { "_firstDeliveryDateTime", new ValidationFirstDeliveryDateTime(logger) },
-        { "_sourceOrder", new ValidationFilePathOrder(logger) },
-        { "_deliveryLog", new ValidationFilePathLog(logger) },
-        { "_deliveryOrder", new ValidationFilePathFilterOrder(logger) }
+        { "_cityDistrict", new ValidationCityDistrict() },
+        { "_firstDeliveryDateTime", new ValidationFirstDeliveryDateTime() },
+        { "_sourceOrder", new ValidationFilePathOrder() },
+        { "_deliveryLog", new ValidationFilePathLog() },
+        { "_deliveryOrder", new ValidationFilePathFilterOrder() }
     };
 
     public ArgsState Validate(string[] args)
     {
         if (args.Length != argsValidation.Count)
         {
-            logger.Error("Incorrect number of arguments entered");
             throw new ArgumentException("Incorrect number of arguments");
         }
 
@@ -41,7 +40,6 @@ public class ArgsCommandLine(ILogger logger)
             }
             else
             {
-                logger.Error($"Incorrect argument name has been entered: {nameParameter}");
                 throw new ArgumentException($"Incorrect argument name has been entered: {nameParameter}");
             }
         }

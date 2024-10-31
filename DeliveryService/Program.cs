@@ -7,17 +7,17 @@ using Serilog;
 
 var argsState = new ArgsCommandLine().Validate(args);
 
+var logger = new LoggerConfiguration()
+                                .MinimumLevel.Debug()
+                                .WriteTo.File(argsState.FilePathLog!)
+                                .CreateLogger();
+
 var filteringArguments = new FilteringArguments
 {
     District = argsState.District!,
     FirstDeliveryDateTime = argsState.FirstDeliveryDateTime!.Value,
     SecondDeliveryDateTime = argsState.FirstDeliveryDateTime.Value.AddMinutes(30)
 };
-
-var logger = new LoggerConfiguration()
-                                .MinimumLevel.Debug()
-                                .WriteTo.File(argsState.FilePathLog!)
-                                .CreateLogger();
 
 var repositoryFileOrders = new RepositoryFileOrders(logger);
 var ordersStr = repositoryFileOrders.ReadOrdersAsync(argsState.FilePathOrder!);
