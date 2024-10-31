@@ -1,32 +1,26 @@
-﻿using System.Globalization;
+﻿using DeliveryService.Core.Validations.Interfaces;
+using DeliveryService.Model;
+using System.Globalization;
 
 namespace DeliveryService.Core.Validations;
 
-public class ValidationFirstDeliveryDateTime
+public class ValidationFirstDeliveryDateTime : IValidationArg
 {
-    private const string correctTitleVariable = "_firstDeliveryDateTime";
+    private const string formatDateTime = "yyyy-MM-dd HH:mm:ss";
+    private const string nameCultureInfo = "ru-RU";
 
-    public DateTime GetCorrect(string arg)
+    public ArgsState SetValidValue(string value, ArgsState argsState)
     {
-        var variableValue = arg.Split("=");
-
-        var titleVariable = variableValue[0];
-        var value = variableValue[1];
-
-        if (titleVariable != correctTitleVariable)
+        if (DateTime.TryParseExact(
+                                value,
+                                formatDateTime,
+                                new CultureInfo(nameCultureInfo),
+                                DateTimeStyles.None,
+                                out DateTime deliveryTime))
         {
-            throw new InvalidDataException("Некорректно задано название переменной");
+            argsState.DeliveryDateTime = deliveryTime;
         }
 
-        if (DateTime.TryParseExact(value,
-                             "yyyy-MM-dd HH:mm:ss",
-                              new CultureInfo("ru-RU"),
-                              DateTimeStyles.None,
-                              out DateTime dateValue))
-        {
-            return dateValue;
-        }
-
-        throw new InvalidDataException("Некорректная дата");
+        return argsState;
     }
 }

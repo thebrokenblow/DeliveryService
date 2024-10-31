@@ -1,56 +1,42 @@
-﻿using Serilog;
-using DeliveryService.Core;
-using DeliveryService.Repositories;
+﻿using DeliveryService.Core.CommandLine;
 using DeliveryService.Factories;
-using Microsoft.Extensions.DependencyInjection;
-using DeliveryService.Repositories.Interfaces;
-using DeliveryService.Factories.Interfaces;
-using DeliveryService.Core.Interfaces;
-using DeliveryService.Core.Validations;
+using DeliveryService.Mapping;
+using DeliveryService.Model;
+using DeliveryService.Repositories;
+using Serilog;
 
+var argsState = new ArgsCommandLine().Validate(args);
 
-if (args.Length != 5)
+var filteringArguments = new FilteringArguments
 {
-    throw new InvalidDataException("Неверное количество аргументов");
-}
-
-var cityDistrict = new ValidationCityDistrict()
-    .GetCorrect(args[0]);
-
-var firstDeliveryDateTime = new ValidationFirstDeliveryDateTime()
-    .GetCorrect(args[1]);
-
-var filePathSourceOrder = new ValidationFilePathSourceOrder()
-    .GetCorrect(args[2]);
-
-var filePathDeliveryLog = new ValidationFilePathDeliveryLog()
-    .GetCorrect(args[3]);
-
-var filePathDeliveryOrder = new ValidationFilePathDeliveryOrder()
-    .GetCorrect(args[4]);
-
-
-var filteredParaments = new FilteredParaments
-{
-    CityDistrict = cityDistrict,
-    FirstDeliveryDateTime = firstDeliveryDateTime,
+    District = argsState.District,
+    FirstDeliveryDateTime = argsState.DeliveryDateTime.Value,
+    SecondDeliveryDateTime = argsState.DeliveryDateTime.Value.AddMinutes(30)
 };
 
-var loggerConfiguration = new LoggerConfiguration()
+var logger = new LoggerConfiguration()
                                 .MinimumLevel.Debug()
-                                .WriteTo.File(filePathDeliveryLog)
+                                .WriteTo.File(argsState.FilePathLog)
                                 .CreateLogger();
 
-var services = new ServiceCollection()
-    .AddSingleton<ILogger>(serviceProvider => loggerConfiguration)
-    .AddTransient<IRepositoryFileOrders, RepositoryFileOrders>()
-    .AddTransient<IFactoryOrders, FactoryOrders>()
-    .AddTransient<IFilteredOrders, FilteredOrders>();
+var repositoryFileOrders = new RepositoryFileOrders(logger);
+var ordersStr = repositoryFileOrders.ReadOrdersAsync(argsState.FilePathOrder);
+var orderMapper = new OrderMapper(new FactoryOrders(), logger);
+var orders = orderMapper.Map(ordersStr);
 
-var serviceProvider = services.BuildServiceProvider();
+var filteringOrders = orders.Where(CreateFilteringMethod(filteringArguments));
+await repositoryFileOrders.WriteOrdersAsync(argsState.FilePathFilterOrder, filteringOrders);
 
-var filteredOrders = serviceProvider.GetRequiredService<IFilteredOrders>();
-var orders = filteredOrders.FilterOrderAsync(filePathSourceOrder, filteredParaments);
+Func<Order, bool> CreateFilteringMethod(FilteringArguments filteringArguments)
+{
+    bool filteringDistrict(Order order) =>
+                order.District
+                    .Equals(filteringArguments.District?
+                                        .ToLower(), StringComparison.CurrentCultureIgnoreCase);
 
-var repositoryFileOrders = serviceProvider.GetRequiredService<IRepositoryFileOrders>();
-await repositoryFileOrders.WriteOrdersAsync(filePathDeliveryOrder, orders);
+    bool filteringDeliveryTime(Order order) =>
+                                    order.DeliveryTime >= filteringArguments.FirstDeliveryDateTime &&
+                                        order.DeliveryTime <= filteringArguments.SecondDeliveryDateTime;
+    return (Order order) =>
+                filteringDistrict(order) && filteringDeliveryTime(order);
+}

@@ -9,26 +9,44 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
 {
     public async IAsyncEnumerable<string> ReadOrdersAsync(string path)
     {
-        using var streamReader = new StreamReader(path);
+        StreamReader? streamReader;
+        try
+        {
+            streamReader = new StreamReader(path);
+        }
+        catch(Exception ex)
+        {
+            logger.Error($"Не смогли начать работу с файлом по пути: {path}, сообщение ошибки: {ex.Message}");
+            throw;
+        }
         
         string? order;
         int countRecords = 0;
-
         do
         {
-            order = await streamReader.ReadLineAsync();
+            try
+            {
+                order = await streamReader.ReadLineAsync();
+            }
+            catch(Exception ex)
+            {
+                logger.Error($"Ошибка чтения строки из файла по пути: {path}, сообщение ошибки: {ex.Message}");
+                throw;
+            }
 
             logger.Information($"Прочтён заказ ({order}) путь ({path})");
-            countRecords++;
 
             if (order is not null)
             {
+                countRecords++;
+
                 yield return order;
             }
         }
         while (order != null);
 
         logger.Information($"Прочтённых заказов ({countRecords}) по пути ({path})");
+        streamReader.Dispose();
     }
 
     public async Task WriteOrdersAsync(string path, IAsyncEnumerable<Order> orders)
@@ -38,7 +56,16 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
                  FileMode.Truncate);
 
         int countRecords = 0;
-        using var streamWriter = new StreamWriter(isolatedStorageFileStream);
+        StreamWriter? streamWriter;
+        try
+        {
+            streamWriter = new StreamWriter(isolatedStorageFileStream);
+        }
+        catch(Exception ex)
+        {
+            logger.Error($"Не смогли начать работу с файлом по пути: {path}, сообщение ошибки: {ex.Message}");
+            throw;
+        }
 
         await foreach (var order in orders)
         {
@@ -54,6 +81,7 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
             }
         }
 
+        streamWriter.Dispose();
         logger.Information($"Записано заказов ({countRecords}) по пути ({path})");
     }
 }

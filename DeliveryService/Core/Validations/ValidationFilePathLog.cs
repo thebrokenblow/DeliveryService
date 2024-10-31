@@ -1,9 +1,9 @@
-﻿using DeliveryService.Model;
-using DeliveryService.Core.Validations.Interfaces;
+﻿using DeliveryService.Core.Validations.Interfaces;
+using DeliveryService.Model;
 
 namespace DeliveryService.Core.Validations;
 
-public class ValidationCityDistrict : IValidationArg
+public class ValidationFilePathLog : IValidationArg
 {
     public ArgsState SetValidValue(string value, ArgsState argsState)
     {
@@ -11,7 +11,7 @@ public class ValidationCityDistrict : IValidationArg
 
         if (!string.IsNullOrEmpty(value))
         {
-            argsState.District = value;
+            argsState.FilePathLog = value;
         }
 
         return argsState;
