@@ -5,7 +5,9 @@ using System.Globalization;
 
 namespace DeliveryService.Core.Validations;
 
-public class ValidationFirstDeliveryDateTime(string formatDateTime = "yyyy-MM-dd HH:mm:ss", string nameCultureInfo = "ru-RU") : IValidationArg
+public class ValidationFirstDeliveryDateTime(
+    string formatDateTime = "yyyy-MM-dd HH:mm:ss", 
+    string nameCultureInfo = "ru-RU") : IValidationArg
 {
     public ArgsState SetValidValue(string value, ArgsState argsState)
     {

@@ -2,7 +2,7 @@
   "profiles": {
     "DeliveryService": {
       "commandName": "Project",
-      "commandLineArgs": "_cityDistrict=\"Central\" _firstDeliveryDateTime=\"2023-12-10 10:40:00\" _sourceOrder=\"C:\\Users\\Artem\\Desktop\\data\\data.txt\" _deliveryLog=\"C:\\Users\\Artem\\Desktop\\data\\log.txt\" _deliveryOrder=\"C:\\Users\\Artem\\Desktop\\data\\result.txt\""
+      "commandLineArgs": "_cityDistrict=\"North\" _firstDeliveryDateTime=\"2023-11-09 12:10:00\" _sourceOrder=\"C:\\Users\\Artem\\Desktop\\data\\data.txt\" _deliveryLog=\"C:\\Users\\Artem\\Desktop\\data\\log.txt\" _deliveryOrder=\"C:\\Users\\Artem\\Desktop\\data\\result.txt\""
     }
   }
 }

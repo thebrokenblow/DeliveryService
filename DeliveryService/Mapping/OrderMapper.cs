@@ -48,6 +48,7 @@ public class OrderMapper(
         if (enumeratorOrderProperties.MoveNext())
         {
             logger.Error("There are extra properties in the record");
+
             throw new IncorrectData("There are extra properties in the record");
         }
 
@@ -74,6 +75,7 @@ public class OrderMapper(
         catch (Exception exception)
         {
             logger.Error($"Failed to convert the type, error message: {exception.Message}");
+
             throw new IncorrectData($"Failed to convert the type, error message: {exception.Message}");
         }
     }
@@ -81,6 +83,7 @@ public class OrderMapper(
     private void LogErrorReadingProperty()
     {
         logger.Error("The property has not been read");
+
         throw new NotFoundException("The property has not been read");
     }
 }

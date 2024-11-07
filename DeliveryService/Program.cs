@@ -1,16 +1,11 @@
-﻿using DeliveryService.Core.CommandLine;
-using DeliveryService.Factories;
-using DeliveryService.Mapping;
+﻿using DeliveryService.Core;
+using DeliveryService.Core.CommandLine;
+using DeliveryService.Mapping.Interfaces;
 using DeliveryService.Model;
-using DeliveryService.Repositories;
-using Serilog;
+using DeliveryService.Repositories.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 var argsState = new ArgsCommandLine().Validate(args);
-
-var logger = new LoggerConfiguration()
-                                .MinimumLevel.Debug()
-                                .WriteTo.File(argsState.FilePathLog!)
-                                .CreateLogger();
 
 var filteringArguments = new FilteringArguments
 {
@@ -19,24 +14,13 @@ var filteringArguments = new FilteringArguments
     SecondDeliveryDateTime = argsState.FirstDeliveryDateTime.Value.AddMinutes(30)
 };
 
-var repositoryFileOrders = new RepositoryFileOrders(logger);
+var serviceProvider = ConfigurationDependency.GetServiceProvider(argsState.FilePathLog!);
+
+var orderMapper = serviceProvider.GetRequiredService<IOrderMapper>();
+var repositoryFileOrders = serviceProvider.GetRequiredService<IRepositoryFileOrders>();
 var ordersStr = repositoryFileOrders.ReadOrdersAsync(argsState.FilePathOrder!);
-var orderMapper = new OrderMapper(new FactoryOrders(), logger);
+
 var orders = orderMapper.Map(ordersStr);
 
-var filteringOrders = orders.Where(CreateFilteringMethod(filteringArguments));
+var filteringOrders = orders.Where(ConfigureFiltering.CreateFiltering(filteringArguments));
 await repositoryFileOrders.WriteOrdersAsync(argsState.FilePathFilterOrder!, filteringOrders);
-
-Func<Order, bool> CreateFilteringMethod(FilteringArguments filteringArguments)
-{
-    bool filteringDistrict(Order order) =>
-                order.District
-                    .Equals(filteringArguments.District?
-                                        .ToLower(), StringComparison.CurrentCultureIgnoreCase);
-
-    bool filteringDeliveryTime(Order order) =>
-                                    order.DeliveryTime >= filteringArguments.FirstDeliveryDateTime &&
-                                        order.DeliveryTime <= filteringArguments.SecondDeliveryDateTime;
-    return (Order order) =>
-                filteringDistrict(order) && filteringDeliveryTime(order);
-}

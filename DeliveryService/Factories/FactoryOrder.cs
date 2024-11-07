@@ -3,7 +3,7 @@ using DeliveryService.Factories.Interfaces;
 
 namespace DeliveryService.Factories;
 
-public class FactoryOrders : IFactoryOrder
+public class FactoryOrder : IFactoryOrder
 {
     public Order Create(OrderDto orderDto) =>
         new()

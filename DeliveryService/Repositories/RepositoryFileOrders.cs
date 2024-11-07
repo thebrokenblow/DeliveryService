@@ -17,6 +17,7 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
         catch(Exception ex)
         {
             logger.Error($"Could not start working with the file at the path: {path}, error message: {ex.Message}");
+            
             throw;
         }
         
@@ -31,6 +32,7 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
             catch(Exception ex)
             {
                 logger.Error($"Error reading a line from a file along the path: {path}, error message: {ex.Message}");
+                
                 throw;
             }
 
@@ -50,28 +52,31 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
 
     public async Task WriteOrdersAsync(string path, IAsyncEnumerable<Order> orders)
     {
-        var isolatedStorageFileStream = new IsolatedStorageFileStream(
-                 path,
-                 FileMode.Truncate);
-
         int countRecords = 0;
         StreamWriter? streamWriter;
         try
         {
+            var isolatedStorageFileStream = new IsolatedStorageFileStream(
+                 path,
+                 FileMode.Truncate);
+
             streamWriter = new StreamWriter(isolatedStorageFileStream);
         }
         catch(Exception ex)
         {
             logger.Error($"Could not start working with the file at the path: {path}, error message: {ex.Message}");
+            
             throw;
         }
 
         await foreach (var order in orders)
         {
             countRecords++;
+
             try
             {
                 await streamWriter.WriteLineAsync(order.ToString());
+                
                 logger.Information($"The order has been write: {order}, path: {path}");
             }
             catch
@@ -81,6 +86,7 @@ public class RepositoryFileOrders(ILogger logger) : IRepositoryFileOrders
         }
 
         logger.Information($"Count of orders write: {countRecords}, path: {path}");
+        
         streamWriter.Dispose();
     }
 }
